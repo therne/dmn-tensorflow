@@ -14,10 +14,18 @@ I've chosen weakly supervised setting - training DMN without supporting facts in
 - [tqdm](https://pypi.python.org/pypi/tqdm) - Progress bar module
 
 ## Usage
-First, Install it.
+First, You need to install dependencies.
 ```
 sudo pip install tqdm
-git clone https://github.com/therne/dmn-tensorflow
+git clone https://github.com/therne/dmn-tensorflow & cd dmn-tensorflow
+```
+
+Then download the dataset:
+```
+mkdir data
+curl -O http://www.thespermwhale.com/jaseweston/babi/tasks_1-20_v1-2.tar.gz
+tar -xzf tasks_1-20_v1-2.tar.gz -C data/
+./fetch_glove.sh 
 ```
 
 ### Training the model
@@ -65,7 +73,7 @@ Result comes close to the fully-supervised settings.
 - [Dynamic-memory-networks-in-Theano][dmn-in-theano] - Original work.
 - [memnn-tensorflow][memnn-tensorflow] - Base code (trainer, loader)
 
-### TO-DO
+### To-do
 - Use [`tf.nn.dynamic_rnn`][dynamic-rnn-docs] for memory optimization
 - Use GRU in answer module to generate answer sequence
 - Interactive mode?
