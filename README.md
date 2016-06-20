@@ -48,7 +48,7 @@ Task                         | Error Rate
 2. Two supporting facts      | 27.2%
 3. Three supporting facts    | -
 4. Two arguments relations   | 23.4%
-5. Three arguments relations | -
+5. Three arguments relations | 1.1%
 8. List/Sets                 | 0.4%
 13. Compound coreference     | 1.5%
 14. Time reasoning           | 0.8%
