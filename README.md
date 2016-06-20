@@ -31,39 +31,30 @@ If you want to run original DMN (`models/old/dmn.py`), you also need to download
 ./main.py --task [bAbi Task Number]
 ```
 
-### Test the model
+### Testing the model
 ```
-./main.py --test --save_dir [Saved directory]
+./main.py --test --task [Task Number]
 ```
 
 ### Results
-*Single run of DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, dropout rate 0.5, L2) + batch normalization.*
+*Single run of DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, dropout rate 0.9, L2) + batch normalization. The skipped tasks achieved 0 error.*
 
 Task                         | Error Rate
 -----------------------------|-------
-1. Single supporting facts   | 0
-2. Two supporting facts      | -
+2. Two supporting facts      | 27.2%
 3. Three supporting facts    | -
-4. Two arguments relations   | 23.43%
+4. Two arguments relations   | 23.4%
 5. Three arguments relations | -
-6. Yes-No Questions          | 0
-7. Counting                  | 0
-8. List/Sets                 | 0.46%
-9. Simple negotiation        | 0
-10. Indefinite knowledge     | 0
-11. Basic coreference	       | 0.02%
-12. Conjuction               | 0
+8. List/Sets                 | 0.4%
 13. Compound coreference     | 1.5%
 14. Time reasoning           | 0.8%
-15. Basic deduction          | 0
 16. Basic induction          | 65.9%
 17. Positional reasoning     | 19.2%
 18. Size reasoning           | 8.7%
 19. Path finding             | 69.9%
-20. Agent’s motivations      | 0
-Average                      | 9.49%
+Average                      | 10.9%
 
-Overfitting occurs in some tasks and theerror rate is higher than the paper's result.
+Overfitting occurs in some tasks and error rate is higher than the paper's result.
 I think we need some additional regularizations.
 
 ### References
