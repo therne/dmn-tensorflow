@@ -1,10 +1,8 @@
 # Dynamic Memory Networks in Tensorflow
-Implementation of [Dynamic Memory Networks for Visual and Textual Question Answering][paper] on the
-[bAbI question answering tasks][babi] using Tensorflow.
-
 ![DMN Structure][img-url]
 
-Strongly supervised settings and visual question answering tasks are not implemented yet.
+Implementation of [Dynamic Memory Networks for Visual and Textual Question Answering][paper] on the
+[bAbI question answering tasks][babi] using Tensorflow.
 
 ## Prerequisites
 - Python 3.x
