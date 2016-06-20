@@ -75,7 +75,7 @@ def main(_):
         os.makedirs(FLAGS.save_dir, exist_ok=True)
 
     with tf.Session() as sess:
-        model = DMN(FLAGS, words, name='DMN_%d' % FLAGS.task)
+        model = DMN(FLAGS, words)
         sess.run(tf.initialize_all_variables())
 
         if FLAGS.test:

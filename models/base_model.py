@@ -7,17 +7,14 @@ from tqdm import tqdm
 
 class BaseModel(object):
     """ Code from mem2nn-tensorflow. """
-    def __init__(self, params, words, name=None):
+    def __init__(self, params, words):
         self.params = params
         self.words = words
         self.save_dir = params.save_dir
 
-        if name is None: name = self.__class__.__name__
-        self.name = name
-        with tf.variable_scope(name):
-            print("Building %s..." % name)
-            self.global_step = tf.get_variable('global_step', shape=[],
-                                               initializer=tf.constant_initializer(), trainable=False)
+        with tf.variable_scope('DMN'):
+            print("Building DMN...")
+            self.global_step = tf.Variable(0, name='global_step', trainable=False)
             self.build()
             self.saver = tf.train.Saver()
 
@@ -73,10 +70,8 @@ class BaseModel(object):
         data.reset()
         loss = np.mean(losses)
 
-        stat = "[%s] step %d: Accuracy = %.2f%% (%d / %d), Loss = %.4f" % \
-              (name, global_step, 100 * float(num_corrects) / total, num_corrects, total, loss)
-        print(stat)
-        with open(self.name + '_result.txt', 'a') as f: f.write(stat + '\n')
+        print("[%s] step %d: Accuracy = %.2f%% (%d / %d), Loss = %.4f" % \
+              (name, global_step, 100 * float(num_corrects) / total, num_corrects, total, loss))
         return loss
 
     def save(self, sess):
