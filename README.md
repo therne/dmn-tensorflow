@@ -24,7 +24,11 @@ curl -O http://www.thespermwhale.com/jaseweston/babi/tasks_1-20_v1-2.tar.gz
 tar -xzf tasks_1-20_v1-2.tar.gz -C data/
 ```
 
-If you want to run original DMN (`models/old/dmn.py`), you also need to download GloVe word embedding data. you can download it by running `fetch_glove.sh`.
+If you want to run original DMN (`models/old/dmn.py`), you also need to download GloVe word embedding data.
+```
+curl -O http://nlp.stanford.edu/data/glove.6B.zip
+unzip glove.6B.zip -d data/glove/
+```
 
 ### Training the model
 ```
