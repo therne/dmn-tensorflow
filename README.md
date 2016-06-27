@@ -41,22 +41,20 @@ unzip glove.6B.zip -d data/glove/
 ```
 
 ### Results
-*Single run of DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, dropout rate 0.9, L2) + batch normalization. The skipped tasks achieved 0 error.*
+*Single run of DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, L2) + batch normalization. The skipped tasks achieved 0 error.*
 
 Task                         | Error Rate
 -----------------------------|-------
-2. Two supporting facts      | 27.2%
-3. Three supporting facts    | -
-4. Two arguments relations   | 23.4%
-5. Three arguments relations | -
-8. List/Sets                 | 0.4%
+2. Two supporting facts      | 25.1%
+3. Three supporting facts    | *(N/A)*
+5. Three arguments relations | 1.1%
 13. Compound coreference     | 1.5%
 14. Time reasoning           | 0.8%
-16. Basic induction          | 65.9%
-17. Positional reasoning     | 19.2%
-18. Size reasoning           | 8.7%
-19. Path finding             | 69.9%
-Average                      | 10.9%
+16. Basic induction          | 52.3%
+17. Positional reasoning     | 13.1%
+18. Size reasoning           | 6.1%
+19. Path finding             | 3.5%
+Average                      | 5.1%
 
 Overfitting occurs in some tasks and error rate is higher than the paper's result.
 I think we need some additional regularizations.
