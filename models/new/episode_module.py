@@ -6,7 +6,7 @@ from utils.attn_gru import AttnGRU
 
 class EpisodeModule:
     """ Inner GRU module in episodic memory that creates episode vector. """
-    def __init__(self, num_hidden, question, facts):
+    def __init__(self, num_hidden, question, facts, is_training, bn):
         self.question = question
         self.facts = tf.unpack(tf.transpose(facts, [1, 2, 0]))  # F x [d, N]
 
@@ -19,7 +19,7 @@ class EpisodeModule:
         self.b1 = bias('b1', [num_hidden, 1])
         self.w2 = weight('w2', [1, num_hidden])
         self.b2 = bias('b2', [1, 1])
-        self.gru = AttnGRU(num_hidden)
+        self.gru = AttnGRU(num_hidden, is_training, bn)
 
     @property
     def init_state(self):

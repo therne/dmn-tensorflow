@@ -4,7 +4,7 @@ from tensorflow.python.ops import rnn_cell
 
 from models.base_model import BaseModel
 from models.new.episode_module import EpisodeModule
-from utils.nn import weight, bias, batch_norm, dropout
+from utils.nn import weight, bias, dropout, batch_norm
 
 
 class DMN(BaseModel):
@@ -23,14 +23,12 @@ class DMN(BaseModel):
         fact_counts = tf.placeholder('int64', shape=[N], name='fc')
         input_mask = tf.placeholder('float32', shape=[N, F, L, V], name='xm')
         is_training = tf.placeholder(tf.bool)
+        self.att = tf.constant(0.)
 
         # Prepare parameters
         gru = rnn_cell.GRUCell(d)
         l = self.positional_encoding()
         embedding = weight('embedding', [A, V], init='uniform', range=3**(1/2))
-
-        w_t = weight('w_t', [3 * d, d])
-        b_t = bias('b_t', d)
 
         with tf.name_scope('SentenceReader'):
             input_list = tf.unpack(tf.transpose(input))  # L x [F, N]
@@ -67,7 +65,7 @@ class DMN(BaseModel):
 
         # Episodic Memory
         with tf.variable_scope('Episodic'):
-            episode = EpisodeModule(d, question_vec, facts)
+            episode = EpisodeModule(d, question_vec, facts, is_training, params.batch_norm)
             memory = tf.identity(question_vec)
 
             for t in range(params.memory_step):
@@ -78,7 +76,15 @@ class DMN(BaseModel):
                         # ReLU update
                         c = episode.new(memory)
                         concated = tf.concat(1, [memory, c, question_vec])
-                        memory = tf.nn.relu(tf.matmul(concated, w_t) + b_t)  # [N, d]
+
+                        w_t = weight('w_t', [3 * d, d])
+                        z = tf.matmul(concated, w_t)
+                        if params.batch_norm:
+                            z = batch_norm(z, is_training)
+                        else:
+                            b_t = bias('b_t', d)
+                            z = z + b_t
+                        memory = tf.nn.relu(z)  # [N, d]
 
                     scope.reuse_variables()
 
@@ -89,7 +95,7 @@ class DMN(BaseModel):
 
         with tf.name_scope('Answer'):
             # Answer module : feed-forward version (for it is one word answer)
-            w_a = weight('w_a', [d, A])
+            w_a = weight('w_a', [d, A], init='xavier')
             logits = tf.matmul(memory, w_a)  # [N, A]
 
         with tf.name_scope('Loss'):

@@ -1,20 +1,26 @@
 import math
 import tensorflow as tf
+import numpy as np
 
 
-def weight(name, shape, init='xavier', range=None):
+def weight(name, shape, init='he', range=None):
     """ Initializes weight.
     :param name: Variable name
     :param shape: Tensor shape
-    :param init: Init mode. xavier / normal / uniform (default is 'xavier')
+    :param init: Init mode. xavier / normal / uniform / he (default is 'he')
     :param range:
     :return: Variable
     """
     initializer = tf.constant_initializer()
     if init == 'xavier':
-        fan_in, fan_out = shape
+        fan_in, fan_out = _get_dims(shape)
         range = math.sqrt(6.0 / (fan_in + fan_out))
         initializer = tf.random_uniform_initializer(-range, range)
+
+    elif init == 'he':
+        fan_in, _ = _get_dims(shape)
+        std = math.sqrt(2.0 / fan_in)
+        initializer = tf.random_normal_initializer(stddev=std)
 
     elif init == 'normal':
         initializer = tf.random_normal_initializer(stddev=0.1)
@@ -27,6 +33,12 @@ def weight(name, shape, init='xavier', range=None):
     var = tf.get_variable(name, shape, initializer=initializer)
     tf.add_to_collection('l2', tf.nn.l2_loss(var))  # Add L2 Loss
     return var
+
+
+def _get_dims(shape):
+    fan_in = shape[0] if len(shape) == 2 else np.prod(shape[:-1])
+    fan_out = shape[1] if len(shape) == 2 else shape[-1]
+    return fan_in, fan_out
 
 
 def bias(name, dim, initial_value=0.0):
@@ -77,3 +89,21 @@ def dropout(x, keep_prob, is_training):
     :return: dropout applied tensor
     """
     return tf.cond(is_training, lambda: tf.nn.dropout(x, keep_prob), lambda: x)
+
+
+def conv(x, filter, is_training):
+    l = tf.nn.conv2d(x, filter, strides=[1, 1, 1, 1], padding='SAME')
+    l = batch_norm(l, is_training)
+    return tf.nn.relu(l)
+
+
+def flatten(x):
+    return tf.reshape(x, [-1])
+
+
+def fully_connected(input, num_neurons, name, is_training):
+    input_size = input.get_shape()[1]
+    w = weight(name, [input_size, num_neurons], init='he')
+    l = tf.matmul(input, w)
+    l = batch_norm(l, is_training)
+    return tf.nn.relu(l)

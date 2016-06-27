@@ -18,7 +18,7 @@ flags.DEFINE_string('save_dir', 'save', 'Save path [save]')
 flags.DEFINE_bool('gpu', True, 'Use GPU? [True]')
 flags.DEFINE_integer('batch_size', 128, 'Batch size during training and testing [128]')
 flags.DEFINE_integer('num_epochs', 256, 'Number of epochs for training [256]')
-flags.DEFINE_float('learning_rate', 0.001, 'Learning rate [0.001]')
+flags.DEFINE_float('learning_rate', 0.002, 'Learning rate [0.002]')
 flags.DEFINE_boolean('load', False, 'Start training from saved model? [False]')
 flags.DEFINE_integer('acc_period', 10, 'Training accuracy display period [10]')
 flags.DEFINE_integer('val_period', 40, 'Validation period (for display purpose) [40]')
@@ -34,7 +34,7 @@ flags.DEFINE_integer('hidden_size', 80, 'Size of hidden units [80]')
 
 # train hyperparameters
 flags.DEFINE_float('weight_decay', 0.001, 'Weight decay - 0 to turn off L2 regularization [0.001]')
-flags.DEFINE_float('keep_prob', 0.9, 'Dropout rate [0.9]')
+flags.DEFINE_float('keep_prob', 1., 'Dropout rate - 1.0 to turn off [1.0]')
 flags.DEFINE_bool('batch_norm', True, 'Use batch normalization? [True]')
 
 # bAbi dataset params
