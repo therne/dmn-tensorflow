@@ -16,13 +16,13 @@ flags.DEFINE_string('save_dir', 'save', 'Save path [save]')
 
 # training options
 flags.DEFINE_bool('gpu', True, 'Use GPU? [True]')
-flags.DEFINE_integer('batch_size', 128, 'Batch size during training and testing [128]')
+flags.DEFINE_integer('batch_size', 64, 'Batch size during training and testing [128]')
 flags.DEFINE_integer('num_epochs', 256, 'Number of epochs for training [256]')
-flags.DEFINE_float('learning_rate', 0.002, 'Learning rate [0.002]')
+flags.DEFINE_float('learning_rate', 0.005, 'Learning rate [0.002]')
 flags.DEFINE_boolean('load', False, 'Start training from saved model? [False]')
 flags.DEFINE_integer('acc_period', 10, 'Training accuracy display period [10]')
-flags.DEFINE_integer('val_period', 40, 'Validation period (for display purpose) [40]')
-flags.DEFINE_integer('save_period', 80, 'Save period [80]')
+flags.DEFINE_integer('val_period', 20, 'Validation period (for display purpose) [40]')
+flags.DEFINE_integer('save_period', 250, 'Save period [80]')
 
 # model params
 flags.DEFINE_integer('memory_step', 3, 'Episodic Memory steps [3]')
@@ -39,7 +39,7 @@ flags.DEFINE_bool('batch_norm', True, 'Use batch normalization? [True]')
 
 # bAbi dataset params
 flags.DEFINE_integer('task', 1, 'bAbi Task number [1]')
-flags.DEFINE_float('val_ratio', 0.1, 'Validation data ratio to training data [0.1]')
+flags.DEFINE_float('val_ratio', 0.2, 'Validation data ratio to test data [0.2]')
 
 FLAGS = flags.FLAGS
 
@@ -64,7 +64,8 @@ def main(_):
     # Read data
     train = read_babi(FLAGS.data_dir, FLAGS.task, 'train', FLAGS.batch_size, words)
     test = read_babi(FLAGS.data_dir, FLAGS.task, 'test', FLAGS.batch_size, words)
-    val = train.split_dataset(FLAGS.val_ratio)
+    # val = test.split_dataset(FLAGS.val_ratio)
+    val = test
 
     FLAGS.max_sent_size, FLAGS.max_ques_size, FLAGS.max_fact_count = get_max_sizes(train, test, val)
     print('Word count: %d, Max sentence len : %d' % (words.vocab_size, FLAGS.max_sent_size))
@@ -74,7 +75,9 @@ def main(_):
     if not os.path.exists(FLAGS.save_dir):
         os.makedirs(FLAGS.save_dir, exist_ok=True)
 
-    with tf.Session() as sess:
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
         model = DMN(FLAGS, words)
         sess.run(tf.initialize_all_variables())
 

@@ -23,7 +23,6 @@ class DMN(BaseModel):
         fact_counts = tf.placeholder('int64', shape=[N], name='fc')
         input_mask = tf.placeholder('float32', shape=[N, F, L, V], name='xm')
         is_training = tf.placeholder(tf.bool)
-        self.att = tf.constant(0.)
 
         # Prepare parameters
         gru = rnn_cell.GRUCell(d)
@@ -65,17 +64,19 @@ class DMN(BaseModel):
 
         # Episodic Memory
         with tf.variable_scope('Episodic'):
-            episode = EpisodeModule(d, question_vec, facts, is_training, params.batch_norm)
-            memory = tf.identity(question_vec)
+            cell = EpisodeModule(d, question_vec, is_training, params.batch_norm)
+            memory = question_vec
 
             for t in range(params.memory_step):
                 with tf.variable_scope('Layer%d' % t) as scope:
+                    cell.memory = memory
+                    _, e = tf.nn.dynamic_rnn(cell, facts, sequence_length=fact_counts, dtype=tf.float32)
+
                     if params.memory_update == 'gru':
-                        memory = gru(episode.new(memory), memory)[0]
+                        memory = gru(e, memory)[0]
                     else:
                         # ReLU update
-                        c = episode.new(memory)
-                        concated = tf.concat(1, [memory, c, question_vec])
+                        concated = tf.concat(1, [memory, e, question_vec])
 
                         w_t = weight('w_t', [3 * d, d])
                         z = tf.matmul(concated, w_t)
@@ -83,7 +84,7 @@ class DMN(BaseModel):
                             z = batch_norm(z, is_training)
                         else:
                             b_t = bias('b_t', d)
-                            z = z + b_t
+                            z = tf.nn.bias_add(z, b_t)
                         memory = tf.nn.relu(z)  # [N, d]
 
                     scope.reuse_variables()
@@ -96,13 +97,14 @@ class DMN(BaseModel):
         with tf.name_scope('Answer'):
             # Answer module : feed-forward version (for it is one word answer)
             w_a = weight('w_a', [d, A], init='xavier')
-            logits = tf.matmul(memory, w_a)  # [N, A]
+            b_a = bias('b_a', 1)
+            logits = tf.matmul(memory, w_a) + b_a  # [N, A]
 
         with tf.name_scope('Loss'):
             # Cross-Entropy loss
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, answer)
             loss = tf.reduce_mean(cross_entropy)
-            total_loss = loss + params.weight_decay * tf.add_n(tf.get_collection('l2'))
+            total_loss = loss #+ params.weight_decay * tf.add_n(tf.get_collection('l2'))
 
         with tf.variable_scope('Accuracy'):
             # Accuracy

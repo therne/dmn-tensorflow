@@ -89,21 +89,3 @@ def dropout(x, keep_prob, is_training):
     :return: dropout applied tensor
     """
     return tf.cond(is_training, lambda: tf.nn.dropout(x, keep_prob), lambda: x)
-
-
-def conv(x, filter, is_training):
-    l = tf.nn.conv2d(x, filter, strides=[1, 1, 1, 1], padding='SAME')
-    l = batch_norm(l, is_training)
-    return tf.nn.relu(l)
-
-
-def flatten(x):
-    return tf.reshape(x, [-1])
-
-
-def fully_connected(input, num_neurons, name, is_training):
-    input_size = input.get_shape()[1]
-    w = weight(name, [input_size, num_neurons], init='he')
-    l = tf.matmul(input, w)
-    l = batch_norm(l, is_training)
-    return tf.nn.relu(l)

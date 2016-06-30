@@ -1,45 +1,38 @@
 import tensorflow as tf
+from tensorflow.python.ops.rnn_cell import RNNCell
 
 from utils.nn import weight, bias
 from utils.attn_gru import AttnGRU
 
 
-class EpisodeModule:
+class EpisodeModule(RNNCell):
     """ Inner GRU module in episodic memory that creates episode vector. """
-    def __init__(self, num_hidden, question, facts, is_training, bn):
+    def __init__(self, num_hidden, question, is_training, bn):
+        self.num_hidden = num_hidden
         self.question = question
-        self.facts = tf.unpack(tf.transpose(facts, [1, 2, 0]))  # F x [d, N]
-
-        # transposing for attention
-        self.question_transposed = tf.transpose(question)
-        self.facts_transposed = [tf.transpose(f) for f in self.facts]  # F x [N, d]
 
         # parameters
-        self.w1 = weight('w1', [num_hidden, 4 * num_hidden])
-        self.b1 = bias('b1', [num_hidden, 1])
-        self.w2 = weight('w2', [1, num_hidden])
-        self.b2 = bias('b2', [1, 1])
+        self.w1 = weight('w1', [4 * num_hidden, num_hidden])
+        self.b1 = bias('b1', [num_hidden])
+        self.w2 = weight('w2', [num_hidden, 1])
+        self.b2 = bias('b2', [1])
         self.gru = AttnGRU(num_hidden, is_training, bn)
 
     @property
-    def init_state(self):
-        return tf.zeros_like(self.facts_transposed[0])
+    def state_size(self):
+        return self.num_hidden
 
-    def new(self, memory):
-        """ Creates new episode vector (will feed into Episodic Memory GRU)
-        :param memory: Previous memory vector
-        :return: episode vector
-        """
-        state = self.init_state
-        memory = tf.transpose(memory)  # [N, D]
+    @property
+    def output_size(self):
+        return self.num_hidden
 
-        with tf.variable_scope('AttnGate') as scope:
-            for f, f_t in zip(self.facts, self.facts_transposed):
-                g = self.attention(f, memory)
-                state = self.gru(f_t, state, g)
-                scope.reuse_variables()  # share params
+    def __call__(self, inputs, state, scope=None):
+        """ Creates new contextual vector at each step """
+        with tf.variable_scope("AttnGate"):
+            g = self.attention(inputs, self.memory)
+            state = self.gru(inputs, state, g)
 
-        return state
+        return state, state
 
     def attention(self, f, m):
         """ Attention mechanism. For details, see paper.
@@ -49,14 +42,14 @@ class EpisodeModule:
         """
         with tf.variable_scope('attention'):
             # NOTE THAT instead of L1 norm we used L2
-            q = self.question_transposed
-            vec = tf.concat(0, [f * q, f * m, tf.abs(f - q), tf.abs(f - m)])  # [4*d, N]
+            q = self.question
+            vec = tf.concat(1, [f * q, f * m, tf.abs(f - q), tf.abs(f - m)])  # [N, 4*d]
 
             # attention learning
-            l1 = tf.matmul(self.w1, vec) + self.b1  # [N, d]
+            l1 = tf.matmul(vec, self.w1) + self.b1  # [N, d]
             l1 = tf.nn.tanh(l1)
-            l2 = tf.matmul(self.w2, l1) + self.b2
+            l2 = tf.matmul(l1, self.w2) + self.b2
             l2 = tf.nn.softmax(l2)
-            return tf.transpose(l2)
+            return l2
 
         return att
