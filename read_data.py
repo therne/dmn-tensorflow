@@ -1,7 +1,7 @@
 """ a neat code from https://github.com/YerevaNN/Dynamic-memory-networks-in-Theano/ """
 import os
 
-from utils.data_utils import DataSet
+from utils.data_utils import DataSet, WordTable
 from copy import deepcopy
 
 
@@ -33,7 +33,7 @@ def load_babi(data_dir, task_id, type='train'):
             skip = True
             continue
 
-        elif task_id != 3 and id > 70:
+        elif task_id != 3 and id > 50:
             skip = True
             continue
 
@@ -49,7 +49,6 @@ def load_babi(data_dir, task_id, type='train'):
             curr_task["A"] = tmp[1].strip()
             tasks.append(deepcopy(curr_task))
 
-    print("Loaded {} data from bAbI {} task {}".format(len(tasks), type, task_id))
     return tasks
 
 
@@ -94,6 +93,32 @@ def read_babi(data_dir, task_id, type, batch_size, word_table):
     """
     data = load_babi(data_dir, task_id, type)
     x, q, y, fc = process_babi(data, word_table)
+    print("Loaded {} data from bAbI {} task {}".format(len(x), type, task_id))
+    return DataSet(batch_size, x, q, y, fc, name=type)
+
+
+def read_all_babi(data_dir, type, batch_size, word_table=WordTable()):
+    """ Reads all bAbi data set.
+    :param data_dir: bAbi data directory
+    :param type: 'train' or 'test'
+    :param batch_size: how many examples in a minibatch?
+    :param word_table: WordTable
+    :return: DataSet
+    """
+    x, q, y, fc = [], [], [], []
+    for task_id in range(1, 21):
+        if task_id == 2 or task_id == 3:
+            # TODO: TL;DR. remove it!
+            continue
+
+        data = load_babi(data_dir, task_id, type)
+        xt, qt, yt, fct = process_babi(data, word_table)
+        x += xt
+        q += qt
+        y += yt
+        fc += fct
+
+    print("Loaded {} data from bAbI {} tasks".format(len(x), type, task_id))
     return DataSet(batch_size, x, q, y, fc, name=type)
 
 
