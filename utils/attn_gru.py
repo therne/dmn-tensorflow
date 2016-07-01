@@ -25,8 +25,8 @@ class AttnGRU:
 
     def _linear(self, x, h, bias_default=0.0):
         I, D = x.get_shape().as_list()[1], self._num_units
-        w = weight('W', [I, D])
-        u = weight('U', [D, D])
+        w = weight('W', [I, D], init='xavier')
+        u = weight('U', [D, D], init='xavier')
         b = bias('b', D, bias_default)
 
         if self.batch_norm:
