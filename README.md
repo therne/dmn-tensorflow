@@ -41,7 +41,7 @@ unzip glove.6B.zip -d data/glove/
 ```
 
 ### Results
-*Single run of DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, L2) + batch normalization. The skipped tasks achieved 0 error.*
+*Trained 20 times and picked best results - using DMN+ model trained with paper settings (Batch 128, 3 episodes, 80 hidden, L2) + batch normalization. The skipped tasks achieved 0 error.*
 
 Task                         | Error Rate
 -----------------------------|-------
