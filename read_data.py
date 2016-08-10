@@ -73,7 +73,7 @@ def process_babi(raw, word_table):
 
         q = [w for w in x["Q"].lower().split(' ') if len(w) > 0]
 
-        word_table.add_vocab(*q, x["A"])
+        word_table.add_vocab(x["A"],*q)
 
         inputs.append(inp)
         questions.append(q)
