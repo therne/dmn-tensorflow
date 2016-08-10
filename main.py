@@ -72,7 +72,7 @@ def main(_):
     # Modify save dir
     FLAGS.save_dir += '/task_%d/' % FLAGS.task
     if not os.path.exists(FLAGS.save_dir):
-        os.makedirs(FLAGS.save_dir, exist_ok=True)
+        os.makedirs(FLAGS.save_dir)
 
     with tf.Session() as sess:
         model = DMN(FLAGS, words)
